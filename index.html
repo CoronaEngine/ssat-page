@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSAT: Real-Time Light-Field Path Tracing for 3D Displays | SIGGRAPH 2026</title>
+<meta name="description" content="A unified framework for real-time light field path tracing on 3D displays via sparse spatial-angular-temporal reconstruction. SIGGRAPH 2026.">
+<meta property="og:title" content="SSAT: Real-Time Light-Field Path Tracing for 3D Displays">
+<meta property="og:description" content="SIGGRAPH 2026 — Real-time 8K light field path tracing on a single consumer GPU via sparse spatial-angular-temporal reconstruction.">
+<meta property="og:image" content="https://coronaengine.github.io/ssat-page/assets/og-image.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+  <div class="hero-bg" style="background-image: url('assets/teaser.png')"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <span class="venue-badge">SIGGRAPH 2026</span>
+    <h1>Real-Time Light-Field Path Tracing for 3D Displays<br>via Sparse Spatial-Angular-Temporal Reconstruction</h1>
+    <p class="authors">
+      Zongyuan Yang<sup>*</sup> &ensp; Liulei Zou<sup>*</sup> &ensp; Ling Zhu<sup>*</sup> &ensp; Yongping Xiong<sup>&dagger;</sup> &ensp; Honghui Fan<sup>&dagger;</sup> &ensp; et al.
+    </p>
+    <p class="affiliations">Beijing University of Posts and Telecommunications &ensp;·&ensp; Jiangsu University of Technology &ensp;·&ensp; Unity</p>
+    <p class="footnotes"><sup>*</sup> Equal contribution &ensp; <sup>&dagger;</sup> Corresponding authors</p>
+    <div class="buttons">
+      <a href="https://doi.org/10.1145/3799902.3811158" class="btn btn-primary" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Paper
+      </a>
+      <a href="https://github.com/CoronaEngine" class="btn btn-muted" target="_blank" rel="noopener" title="Source code coming soon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Code
+        <span class="coming-soon">Coming Soon</span>
+      </a>
+      <span class="btn btn-disabled" title="Video coming soon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        Video
+        <span class="coming-soon">Coming Soon</span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<!-- Abstract & BibTeX -->
+<section class="section" id="abstract">
+  <div class="container">
+    <h2>Abstract</h2>
+    <p class="abstract-text">
+      This paper presents a modern, comprehensive system for real-time light field path tracing, addressing the prohibitive computational overhead inherent in driving high-density 3D displays. While offering immersive glasses-free 3D experiences, these displays necessitate the synthesis of massive angular information across numerous viewpoints to satisfy their optical requirements. We resolve this by reformulating light field synthesis as a sparse signal reconstruction task on a high-dimensional manifold, introducing a unified algebraic framework governed by three mathematical primitives—Φ, Ψ, Υ—that respectively decouple rendering logic from heterogeneous optical hardware, establish deterministic geometric connectivity across disparate viewpoints, and enable atomic access to unstructured sparse data. We demonstrate a complete end-to-end system capable of driving 8K light field displays at interactive frame rates using a single consumer GPU, outperforming existing baselines in computational efficiency and reconstruction fidelity while supporting complex modern light transport effects.
+    </p>
+    <div class="bibtex-box">
+      <div class="bibtex-header">
+        <span class="bibtex-label">BibTeX</span>
+        <button class="copy-btn" onclick="copyBibtex()" id="copyBtn">Copy</button>
+      </div>
+      <pre id="bibtex">@inproceedings{yang2026ssat,
+  title={Real-Time Light-Field Path Tracing for 3D Displays
+         via Sparse Spatial-Angular-Temporal Reconstruction},
+  author={Yang, Zongyuan and Zou, Liulei and Zhu, Ling and
+          Xiong, Yongping and Fan, Honghui and Liu, Baolin and
+          Song, Yingde and Zhu, Yu and Zeng, Chang and Ye, Wangping},
+  booktitle={ACM SIGGRAPH 2026 Conference Papers},
+  year={2026},
+  doi={10.1145/3799902.3811158},
+  publisher={ACM}
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- Method Overview -->
+<section class="section section-alt" id="method">
+  <div class="container">
+    <h2>Method Overview</h2>
+    <div class="method-grid">
+      <div class="method-text">
+        <p>We reformulate real-time automultiscopic rendering as sparse signal reconstruction on the 5D phase space (Ω × Π × T). The core insight is that sub-pixels on a lenticular display—whether spatially adjacent, angularly neighboring, or temporally correlated—observe the same scene geometry from distinct phase-space positions, forming a smooth manifold.</p>
+        <p>Three hardware-aware operators underpin the framework:</p>
+        <ul>
+          <li><strong>Φ</strong> — <em>Ray Transfer Operator</em>: encodes the bijection from sub-pixel coordinates to world-space rays, abstracting away device-specific calibration.</li>
+          <li><strong>Ψ</strong> — <em>Manifold Transport Operator</em>: navigates the manifold by computing geometry-consistent phase-space displacements for cross-view radiance reuse.</li>
+          <li><strong>Υ</strong> — <em>Sparse Gathering Operator</em>: performs normalized weighted lookup over the sparse sample buffer, bridging continuous manifold predictions and discrete samples.</li>
+        </ul>
+        <p>Together, they convert the hardware's angular interlacing from a rendering bottleneck into a structural advantage for sparse reconstruction.</p>
+      </div>
+      <div class="method-image">
+        <img src="assets/pipeline.png" alt="Pipeline overview" loading="lazy">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Results Gallery -->
+<section class="section" id="gallery">
+  <div class="container">
+    <h2>Results</h2>
+    <div class="carousel-wrapper">
+      <button class="carousel-arrow carousel-prev" onclick="scrollCarousel(-1)" aria-label="Previous">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="carousel" id="carousel">
+        <div class="carousel-slide">
+          <div class="carousel-image"><img src="assets/teaser.png" alt="Teaser" loading="lazy"></div>
+          <p class="carousel-caption">Real-time light field path tracing on 8K (left) and 4K (right) automultiscopic displays — Live Camera Capture.</p>
+        </div>
+        <div class="carousel-slide">
+          <div class="carousel-image"><img src="assets/pipeline.png" alt="Pipeline" loading="lazy"></div>
+          <p class="carousel-caption">Geometry-Driven Active Sensing Pipeline: adaptive sampling + spatio-angular integration + 5D temporal accumulation.</p>
+        </div>
+        <div class="carousel-slide">
+          <div class="carousel-image"><img src="assets/results.png" alt="Results" loading="lazy"></div>
+          <p class="carousel-caption">Quantitative evaluation across display form factors and comparison against Tauray and Angular-Adapted SVGF baselines.</p>
+        </div>
+        <div class="carousel-slide">
+          <div class="carousel-image"><img src="assets/gallery.png" alt="Gallery" loading="lazy"></div>
+          <p class="carousel-caption">Full-view comparison between high-resolution reference (HR) and our method on StairCase and Bathroom scenes at 4K.</p>
+        </div>
+      </div>
+      <button class="carousel-arrow carousel-next" onclick="scrollCarousel(1)" aria-label="Next">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="carousel-dots" id="carouselDots"></div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <p>&copy; 2026 CoronaEngine &ensp;·&ensp; SIGGRAPH 2026 &ensp;·&ensp;
+      <a href="https://github.com/CoronaEngine" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+      </a>
+    </p>
+  </div>
+</footer>
+
+<script>
+function copyBibtex() {
+  const bibtex = document.getElementById('bibtex').textContent;
+  navigator.clipboard.writeText(bibtex).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function scrollCarousel(dir) {
+  const carousel = document.getElementById('carousel');
+  const slideWidth = carousel.querySelector('.carousel-slide').offsetWidth + 16;
+  carousel.scrollBy({ left: dir * slideWidth, behavior: 'smooth' });
+}
+
+// Carousel dots
+(function() {
+  const carousel = document.getElementById('carousel');
+  const dotsContainer = document.getElementById('carouselDots');
+  const slides = carousel.querySelectorAll('.carousel-slide');
+  slides.forEach((_, i) => {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    dot.onclick = () => {
+      carousel.scrollTo({ left: i * (slides[0].offsetWidth + 16), behavior: 'smooth' });
+    };
+    dotsContainer.appendChild(dot);
+  });
+  let activeIndex = 0;
+  carousel.addEventListener('scroll', () => {
+    const w = slides[0].offsetWidth + 16;
+    const idx = Math.round(carousel.scrollLeft / w);
+    if (idx !== activeIndex) {
+      activeIndex = idx;
+      dotsContainer.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+  });
+  dotsContainer.children[0]?.classList.add('active');
+})();
+</script>
+</body>
+</html>
