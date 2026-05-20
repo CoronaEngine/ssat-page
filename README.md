@@ -1,4 +1,5 @@
 # SSAT: Real-Time Light-Field Path Tracing for 3D Displays
+## Real-Time Light-Field Path Tracing for 3D Displays via Sparse Spatial-Angular-Temporal Reconstruction
 
 **SIGGRAPH 2026 Conference Papers**
 
